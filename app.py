@@ -19,8 +19,10 @@ CLASSES = ['No Tumor', 'Benign Tumor', 'Malignant Tumor', 'Pituitary Tumor']
 
 # Load models
 MODEL_PATHS = {
-    "EfficientNet": "effnet.h5"  # Update with actual model path
+    "CNN Model": "brain_tumor_cnn.h5",  # Update with actual model path
+    "EfficientNet": "brain_tumor_efficientnet.h5"  # Update with actual model path
 }
+
 
 # Sidebar for model selection
 st.sidebar.header("Model Selection")
