@@ -1,10 +1,10 @@
 import streamlit as st
 import numpy as np
 import cv2
+import os
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.image import img_to_array
 from PIL import Image
-import matplotlib.pyplot as plt
 
 # Streamlit app configuration
 st.set_page_config(
@@ -17,12 +17,16 @@ st.set_page_config(
 IMAGE_SIZE = 224
 CLASSES = ['No Tumor', 'Benign Tumor', 'Malignant Tumor', 'Pituitary Tumor']
 
-# Load models
+# Load models (Ensure correct paths)
 MODEL_PATHS = {
     "DensenetModel": "densenet121.h5",  # Update with actual model path
     "EfficientNet": "effnet.h5"  # Update with actual model path
 }
 
+# Verify model file existence
+for model_name, path in MODEL_PATHS.items():
+    if not os.path.exists(path):
+        st.sidebar.error(f"🚨 Model file not found: {path}")
 
 # Sidebar for model selection
 st.sidebar.header("Model Selection")
@@ -34,7 +38,11 @@ selected_model_name = st.sidebar.selectbox(
 # Load the selected model
 @st.cache_resource
 def load_selected_model(model_name):
-    return load_model(MODEL_PATHS[model_name])
+    try:
+        return load_model(MODEL_PATHS[model_name])
+    except Exception as e:
+        st.error(f"⚠️ Error loading model: {e}")
+        return None  # Return None to handle errors
 
 model = load_selected_model(selected_model_name)
 
@@ -80,25 +88,28 @@ MRI scans are the best technique for tumor detection. AI-based models can assist
 uploaded_file = st.file_uploader("📂 Upload an MRI image (JPEG/PNG)...", type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
-    # Read and decode the image
+    # Read and decode the image safely
     file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
     image = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
 
     # Validate image
     if image is None:
         st.error("⚠️ The uploaded file is not a valid image. Please upload a valid MRI scan.")
+        st.stop()
     elif image.shape[0] < 224 or image.shape[1] < 224:
         st.error("⚠️ Please upload a higher resolution MRI scan (at least 224x224 pixels).")
-    else:
-        col1, col2 = st.columns([2, 1])
-        
-        with col1:
-            st.image(image, caption="📷 Uploaded MRI Scan", use_column_width=True)
-        
-        # Preprocess the image
-        processed_image = preprocess_image(image, target_size=(IMAGE_SIZE, IMAGE_SIZE))
-        
-        # Predict
+        st.stop()
+    
+    # Display the uploaded image
+    col1, col2 = st.columns([1, 1])
+    with col1:
+        st.image(image, caption="📷 Uploaded MRI Scan", use_column_width=True)
+    
+    # Preprocess the image
+    processed_image = preprocess_image(image, target_size=(IMAGE_SIZE, IMAGE_SIZE))
+    
+    # Ensure model is loaded before predicting
+    if model:
         prediction = model.predict(processed_image)
         predicted_class = np.argmax(prediction[0])
         
@@ -122,6 +133,8 @@ if uploaded_file is not None:
         st.markdown("---")
         st.markdown("### 🧪 Future Enhancements")
         st.write("Further analysis such as tumor segmentation and 3D visualization can improve diagnostics.")
+    else:
+        st.error("⚠️ Model failed to load. Please try again later.")
 
 # Add footer
 st.markdown("---")
