@@ -20,7 +20,7 @@ CLASSES = ['No Tumor', 'Benign Tumor', 'Malignant Tumor', 'Pituitary Tumor']
 # Load models (Ensure correct paths)
 MODEL_PATHS = {
     "DensenetModel": "densenet121.h5",  # Update with actual model path
-    "EfficientNet": "effnet.h5"  # Update with actual model path
+    "EfficientNet": "EfficientNetB0.keras"  # Update with actual model path
 }
 
 # Verify model file existence
@@ -43,6 +43,7 @@ def load_selected_model(model_name):
     except Exception as e:
         st.error(f"⚠️ Error loading model: {e}")
         return None  # Return None to handle errors
+
 
 model = load_selected_model(selected_model_name)
 
