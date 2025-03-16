@@ -70,20 +70,20 @@ def preprocess_image(image, target_size=(224, 224)):
 # Function to get the Grad-CAM heatmap
 def get_gradcam_heatmap(model, img_array, last_conv_layer_name=None):
     """
-    Generates a Grad-CAM heatmap for model explainability.
-
+    Generates a Grad-CAM heatmap for model interpretability.
+    
     Args:
         model: Trained model.
         img_array: Preprocessed image.
-        last_conv_layer_name: Name of the last convolutional layer.
-
+        last_conv_layer_name: Name of the last convolutional layer (optional).
+    
     Returns:
         numpy.ndarray: Grad-CAM heatmap.
     """
     if last_conv_layer_name is None:
-        # Automatically find the last convolutional layer
+        # Automatically detect the last convolutional layer
         for layer in reversed(model.layers):
-            if len(layer.output_shape) == 4:  # Look for Conv2D layers
+            if hasattr(layer, 'output_shape') and len(layer.output_shape) == 4:
                 last_conv_layer_name = layer.name
                 break
 
@@ -91,6 +91,7 @@ def get_gradcam_heatmap(model, img_array, last_conv_layer_name=None):
         st.error("⚠️ Could not determine the last convolutional layer for Grad-CAM.")
         return None
 
+    # Create a model mapping input to the last conv layer output & predictions
     grad_model = tf.keras.models.Model(
         [model.inputs], [model.get_layer(last_conv_layer_name).output, model.output]
     )
@@ -109,6 +110,7 @@ def get_gradcam_heatmap(model, img_array, last_conv_layer_name=None):
     heatmap /= np.max(heatmap)
 
     return heatmap.numpy()
+
 
 # App header
 st.title("🧠 Brain Tumor Detection")
