@@ -20,7 +20,7 @@ CLASSES = ['No Tumor', 'Benign Tumor', 'Malignant Tumor', 'Pituitary Tumor']
 # Load models (Ensure correct paths)
 MODEL_PATHS = {
     "DensenetModel": "densenet121.h5",  # Update with actual model path
-    "EfficientNet": "effnet.h5"  # Update with actual model path
+    "EfficientNet": "EfficientNetB0.h5"  # Update with actual model path
 }
 
 # Verify model file existence
