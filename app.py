@@ -14,7 +14,7 @@ st.set_page_config(
 )
 
 # Constants
-IMAGE_SIZE = 224
+DEFAULT_IMAGE_SIZE = 224  # Default size, will adjust based on model
 CLASSES = ['No Tumor', 'Benign Tumor', 'Malignant Tumor', 'Pituitary Tumor']
 
 # Load models (Ensure correct paths)
@@ -39,11 +39,12 @@ selected_model_name = st.sidebar.selectbox(
 @st.cache_resource
 def load_selected_model(model_name):
     try:
-        return load_model(MODEL_PATHS[model_name])
+        model = load_model(MODEL_PATHS[model_name])
+        st.write(f"Model input shape for {model_name}: {model.input_shape}")  # Debug line
+        return model
     except Exception as e:
         st.error(f"⚠️ Error loading model: {e}")
         return None  # Return None to handle errors
-
 
 model = load_selected_model(selected_model_name)
 
@@ -59,11 +60,18 @@ def preprocess_image(image, target_size=(224, 224)):
     Returns:
         numpy.ndarray: The preprocessed image.
     """
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # Convert to RGB if needed
-    image = cv2.resize(image, target_size)  # Resize to target size
-    image = img_to_array(image)  # Convert to array
-    image = np.expand_dims(image, axis=0)  # Expand dimensions for model input
+    # Handle grayscale or single-channel images
+    if len(image.shape) == 2 or (len(image.shape) == 3 and image.shape[2] == 1):
+        image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
+    else:
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    
+    # Resize and preprocess
+    image = cv2.resize(image, target_size)
+    image = img_to_array(image)
+    image = np.expand_dims(image, axis=0)
     image = image / 255.0  # Normalize pixel values to [0, 1]
+    st.write(f"Processed image shape: {image.shape}")  # Debug line
     return image
 
 # App header and introduction
@@ -97,8 +105,13 @@ if uploaded_file is not None:
     if image is None:
         st.error("⚠️ The uploaded file is not a valid image. Please upload a valid MRI scan.")
         st.stop()
-    elif image.shape[0] < 224 or image.shape[1] < 224:
-        st.error("⚠️ Please upload a higher resolution MRI scan (at least 224x224 pixels).")
+    
+    # Check resolution (minimum size will be dynamically set by model)
+    if model and (image.shape[0] < model.input_shape[1] or image.shape[1] < model.input_shape[2]):
+        st.error(f"⚠️ Please upload an MRI scan with at least {model.input_shape[1]}x{model.input_shape[2]} pixels.")
+        st.stop()
+    elif not model and (image.shape[0] < DEFAULT_IMAGE_SIZE or image.shape[1] < DEFAULT_IMAGE_SIZE):
+        st.error(f"⚠️ Please upload an MRI scan with at least {DEFAULT_IMAGE_SIZE}x{DEFAULT_IMAGE_SIZE} pixels.")
         st.stop()
     
     # Display the uploaded image
@@ -106,36 +119,41 @@ if uploaded_file is not None:
     with col1:
         st.image(image, caption="📷 Uploaded MRI Scan", use_column_width=True)
     
-    # Preprocess the image
-    processed_image = preprocess_image(image, target_size=(IMAGE_SIZE, IMAGE_SIZE))
-    
-    # Ensure model is loaded before predicting
+    # Preprocess the image based on model input shape
     if model:
-        prediction = model.predict(processed_image)
-        predicted_class = np.argmax(prediction[0])
+        target_size = model.input_shape[1:3]  # Extract height and width (e.g., (224, 224))
+        processed_image = preprocess_image(image, target_size=target_size)
         
-        # Display results
-        with col2:
-            st.markdown("## 🏆 Prediction Results")
-            st.write(f"### **Model Used:** {selected_model_name}")
-            st.write(f"### **Predicted Category:** {CLASSES[predicted_class]}")
+        # Make prediction
+        try:
+            prediction = model.predict(processed_image)
+            predicted_class = np.argmax(prediction[0])
             
-            # Detailed explanation
-            if predicted_class == 0:
-                st.success("No tumor detected! Keep up with regular health check-ups.")
-            elif predicted_class == 1:
-                st.warning("A benign tumor detected. Please consult a doctor for further evaluation.")
-            elif predicted_class == 2:
-                st.error("A malignant tumor detected. Immediate medical attention is advised.")
-            elif predicted_class == 3:
-                st.error("A pituitary tumor detected. Consult a neurologist for further treatment.")
+            # Display results
+            with col2:
+                st.markdown("## 🏆 Prediction Results")
+                st.write(f"### **Model Used:** {selected_model_name}")
+                st.write(f"### **Predicted Category:** {CLASSES[predicted_class]}")
+                
+                # Detailed explanation
+                if predicted_class == 0:
+                    st.success("No tumor detected! Keep up with regular health check-ups.")
+                elif predicted_class == 1:
+                    st.warning("A benign tumor detected. Please consult a doctor for further evaluation.")
+                elif predicted_class == 2:
+                    st.error("A malignant tumor detected. Immediate medical attention is advised.")
+                elif predicted_class == 3:
+                    st.error("A pituitary tumor detected. Consult a neurologist for further treatment.")
         
-        # Future enhancements
-        st.markdown("---")
-        st.markdown("### 🧪 Future Enhancements")
-        st.write("Further analysis such as tumor segmentation and 3D visualization can improve diagnostics.")
+        except Exception as e:
+            st.error(f"⚠️ Prediction failed: {e}")
     else:
         st.error("⚠️ Model failed to load. Please try again later.")
+
+    # Future enhancements
+    st.markdown("---")
+    st.markdown("### 🧪 Future Enhancements")
+    st.write("Further analysis such as tumor segmentation and 3D visualization can improve diagnostics.")
 
 # Add footer
 st.markdown("---")
