@@ -4,7 +4,7 @@ import tensorflow as tf
 from tensorflow.keras.models import load_model
 import cv2
 from PIL import Image
-import os
+import io
 
 # Set page configuration
 st.set_page_config(
@@ -16,7 +16,7 @@ st.set_page_config(
 # Define constants
 IMAGE_SIZE = 150
 LABELS = ['Glioma Tumor', 'No Tumor', 'Meningioma Tumor', 'Pituitary Tumor']
-MODEL_PATH = 'EfficientNetB0.h5'  # Path to your model in the Git repository
+MODEL_PATH = 'EfficientNetB0.h5'
 
 # Custom CSS
 st.markdown("""
@@ -55,38 +55,38 @@ def load_classification_model():
         return model
     except Exception as e:
         st.error(f"Error loading model: {e}")
-        st.info(f"Looking for model at: {os.path.abspath(MODEL_PATH)}")
-        st.info(f"Current working directory: {os.getcwd()}")
-        st.info(f"Files in current directory: {os.listdir('.')}")
         return None
 
-# Preprocess image
-def preprocess_image(image):
-    # Convert to numpy array
-    img_array = np.array(image)
+# Image prediction function
+def img_pred(uploaded_file, model):
+    # Read and process image
+    img = Image.open(io.BytesIO(uploaded_file.read())).convert('RGB')
+    opencvImage = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
+    img = cv2.resize(opencvImage, (IMAGE_SIZE, IMAGE_SIZE))
+    img = img.reshape(1, IMAGE_SIZE, IMAGE_SIZE, 3)
     
-    # Resize to model input size
-    img_resized = cv2.resize(img_array, (IMAGE_SIZE, IMAGE_SIZE))
+    # Normalize image
+    img = img / 255.0
     
-    # Normalize the image
-    img_normalized = img_resized / 255.0
-    
-    # Expand dimensions to match model input shape
-    img_expanded = np.expand_dims(img_normalized, axis=0)
-    
-    return img_expanded
-
-# Predict function
-def predict_tumor_class(model, img):
     # Get prediction
     prediction = model.predict(img)
+    pred_index = np.argmax(prediction, axis=1)[0]
     
-    # Get class with highest probability
-    class_index = np.argmax(prediction[0])
-    class_name = LABELS[class_index]
-    confidence = float(prediction[0][class_index])
+    # Get probabilities for all classes
+    probabilities = prediction[0]
     
-    return class_name, confidence, prediction[0]
+    # Determine result
+    if pred_index == 0:
+        result = 'Glioma Tumor'
+    elif pred_index == 1:
+        result = 'No Tumor'
+    elif pred_index == 2:
+        result = 'Meningioma Tumor'
+    else:
+        result = 'Pituitary Tumor'
+        
+    confidence = float(probabilities[pred_index])
+    return result, confidence, probabilities
 
 # Main app
 def main():
@@ -96,7 +96,7 @@ def main():
     # Sidebar
     st.sidebar.markdown("<h2 class='subheader'>About</h2>", unsafe_allow_html=True)
     st.sidebar.info(
-        "This application uses a deep learning model (EfficientNetB0) to classify brain MRI scans "
+        "This application uses EfficientNetB0 to classify brain MRI scans "
         "into four categories: Glioma Tumor, No Tumor, Meningioma Tumor, and Pituitary Tumor."
     )
     
@@ -114,18 +114,17 @@ def main():
     col1, col2 = st.columns([1, 1])
     
     if uploaded_file is not None and model is not None:
-        # Read and display the image
+        # Display the image
         image = Image.open(uploaded_file).convert('RGB')
+        uploaded_file.seek(0)  # Reset file pointer after reading
+        
         with col1:
             st.image(image, caption="Uploaded MRI Scan", use_column_width=True)
             st.markdown("<p class='info-text'>Image preview</p>", unsafe_allow_html=True)
         
-        # Preprocess the image
-        processed_img = preprocess_image(image)
-        
         # Get prediction
         with st.spinner("Analyzing image..."):
-            class_name, confidence, all_probabilities = predict_tumor_class(model, processed_img)
+            class_name, confidence, probabilities = img_pred(uploaded_file, model)
         
         # Display results
         with col2:
@@ -133,32 +132,27 @@ def main():
             st.markdown(f"<p class='result-text'>Diagnosis: {class_name}</p>", unsafe_allow_html=True)
             st.markdown(f"<p>Confidence: {confidence:.2%}</p>", unsafe_allow_html=True)
             
-            # Display probabilities for all classes
+            # Display probabilities
             st.markdown("<h3>Probability Distribution</h3>", unsafe_allow_html=True)
-            
             for i, label in enumerate(LABELS):
-                prob = all_probabilities[i]
+                prob = probabilities[i]
                 st.progress(float(prob))
                 st.markdown(f"{label}: {prob:.2%}")
-
+                
     elif model is None:
-        st.error("Model could not be loaded. Please check the model path and ensure it's properly committed to Git.")
+        st.error("Model could not be loaded. Please ensure the model file is available.")
     else:
         st.info("Please upload a brain MRI image to get started.")
         
         # Display sample information
         st.markdown("<h2 class='subheader'>Classification Information</h2>", unsafe_allow_html=True)
         st.markdown(
-            "The model can classify brain MRI scans into four categories:\n"
-            "- Glioma Tumor: A type of tumor that originates in the glial cells of the brain or spine\n"
-            "- No Tumor: Normal brain scan with no tumor present\n"
-            "- Meningioma Tumor: A tumor that forms on membranes covering the brain and spinal cord\n"
-            "- Pituitary Tumor: A tumor that develops in the pituitary gland"
+            "The model can classify brain MRI scans into:\n"
+            "- Glioma Tumor: Originates in glial cells\n"
+            "- No Tumor: Normal brain scan\n"
+            "- Meningioma Tumor: Forms on brain/spinal cord membranes\n"
+            "- Pituitary Tumor: Develops in pituitary gland"
         )
-        
-        # Display sample MRI images (placeholder)
-        st.markdown("<h3>Sample MRI Classifications</h3>", unsafe_allow_html=True)
-        st.info("Upload an image to see the classification results.")
 
 if __name__ == "__main__":
     main()
