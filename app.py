@@ -12,9 +12,8 @@ def load_model():
     return tf.keras.models.load_model('EfficientNetB0.h5')
 
 model = load_model()
-
 # Grad-CAM implementation
-def grad_cam(model, img_array, layer_name='efficientnetb0', pred_index=None):
+def grad_cam(model, img_array, layer_name='top_conv', pred_index=None):
     grad_model = Model(
         inputs=model.inputs,
         outputs=[model.get_layer(layer_name).output, model.output]
@@ -34,7 +33,6 @@ def grad_cam(model, img_array, layer_name='efficientnetb0', pred_index=None):
     heatmap = tf.squeeze(heatmap)
     heatmap = tf.maximum(heatmap, 0) / tf.math.reduce_max(heatmap)
     return heatmap.numpy()
-
 # Custom CSS styling
 st.markdown("""
     <style>
