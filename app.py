@@ -5,7 +5,7 @@ import cv2
 import numpy as np
 
 # Load the pre-trained model with proper caching
-@st.cache_resource  # Changed from st.cache
+@st.cache_resource
 def load_model():
     model = tf.keras.models.load_model('EfficientNetB0.h5')
     return model
@@ -22,7 +22,7 @@ uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png
 if uploaded_file is not None:
     # Display the uploaded image
     image = Image.open(uploaded_file)
-    st.image(image, caption='Uploaded Image', use_column_width=True)
+    st.image(image, caption='Uploaded Image', use_container_width=True)  # Updated parameter
     
     # Preprocess the image
     opencv_image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
