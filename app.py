@@ -4,7 +4,7 @@ import tensorflow as tf
 from tensorflow.keras.models import load_model
 import cv2
 from PIL import Image
-import io
+import os
 
 # Set page configuration
 st.set_page_config(
@@ -16,6 +16,7 @@ st.set_page_config(
 # Define constants
 IMAGE_SIZE = 150
 LABELS = ['Glioma Tumor', 'No Tumor', 'Meningioma Tumor', 'Pituitary Tumor']
+MODEL_PATH = 'EfficientNetB0.h5'  # Path to your model in the Git repository
 
 # Custom CSS
 st.markdown("""
@@ -46,13 +47,17 @@ st.markdown("""
 # Header
 st.markdown("<h1 class='main-header'>Brain Tumor MRI Classification</h1>", unsafe_allow_html=True)
 
-# Load the saved model
+# Load the model
 @st.cache_resource
 def load_classification_model():
     try:
-        return load_model('EfficientNetB0.h5')
-    except:
-        st.error("Model file not found. Please make sure 'EfficientNetB0.h5' is in the same directory as this app.")
+        model = load_model(MODEL_PATH)
+        return model
+    except Exception as e:
+        st.error(f"Error loading model: {e}")
+        st.info(f"Looking for model at: {os.path.abspath(MODEL_PATH)}")
+        st.info(f"Current working directory: {os.getcwd()}")
+        st.info(f"Files in current directory: {os.listdir('.')}")
         return None
 
 # Preprocess image
@@ -136,18 +141,24 @@ def main():
                 st.progress(float(prob))
                 st.markdown(f"{label}: {prob:.2%}")
 
+    elif model is None:
+        st.error("Model could not be loaded. Please check the model path and ensure it's properly committed to Git.")
     else:
         st.info("Please upload a brain MRI image to get started.")
         
-        # Display sample images
-        st.markdown("<h2 class='subheader'>Sample Results</h2>", unsafe_allow_html=True)
+        # Display sample information
+        st.markdown("<h2 class='subheader'>Classification Information</h2>", unsafe_allow_html=True)
         st.markdown(
             "The model can classify brain MRI scans into four categories:\n"
-            "- Glioma Tumor\n"
-            "- No Tumor\n"
-            "- Meningioma Tumor\n"
-            "- Pituitary Tumor"
+            "- Glioma Tumor: A type of tumor that originates in the glial cells of the brain or spine\n"
+            "- No Tumor: Normal brain scan with no tumor present\n"
+            "- Meningioma Tumor: A tumor that forms on membranes covering the brain and spinal cord\n"
+            "- Pituitary Tumor: A tumor that develops in the pituitary gland"
         )
+        
+        # Display sample MRI images (placeholder)
+        st.markdown("<h3>Sample MRI Classifications</h3>", unsafe_allow_html=True)
+        st.info("Upload an image to see the classification results.")
 
 if __name__ == "__main__":
     main()
