@@ -50,7 +50,7 @@ st.markdown("<h1 class='main-header'>Brain Tumor MRI Classification</h1>", unsaf
 @st.cache_resource
 def load_classification_model():
     try:
-        return load_model('EfficientNetB0.h5')
+        return load_model('EfficientNetB0_Np.h5')
     except:
         st.error("Model file not found. Please make sure 'EfficientNetB0.h5' is in the same directory as this app.")
         return None
