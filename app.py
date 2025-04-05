@@ -4,8 +4,8 @@ from PIL import Image
 import cv2
 import numpy as np
 
-# Load the pre-trained model
-@st.cache(allow_output_mutation=True)
+# Load the pre-trained model with proper caching
+@st.cache_resource  # Changed from st.cache
 def load_model():
     model = tf.keras.models.load_model('EfficientNetB0.h5')
     return model
