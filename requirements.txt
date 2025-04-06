@@ -1,6 +1,6 @@
 streamlit
 opencv-python
-tensorflow==2.4.1
+tensorflow
 numpy
 pandas
 matplotlib
