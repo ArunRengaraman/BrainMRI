@@ -6,14 +6,18 @@ import numpy as np
 import matplotlib.pyplot as plt
 from tensorflow.keras.models import Model
 
-# Load the pre-trained model with proper caching
+# Load the pre-trained models with proper caching
 @st.cache_resource
-def load_model():
-    return tf.keras.models.load_model('EfficientNetB0.h5')
+def load_model(model_name):
+    if model_name == "EfficientNetB0":
+        return tf.keras.models.load_model('EfficientNetB0.h5')
+    elif model_name == "ResNet50":
+        return tf.keras.models.load_model('ResNet50.h5')
+    elif model_name == "DenseNet121":
+        return tf.keras.models.load_model('DenseNet121.h5')
 
-model = load_model()
 # Grad-CAM implementation
-def grad_cam(model, img_array, layer_name='top_conv', pred_index=None):
+def grad_cam(model, img_array, layer_name, pred_index=None):
     grad_model = Model(
         inputs=model.inputs,
         outputs=[model.get_layer(layer_name).output, model.output]
@@ -33,6 +37,7 @@ def grad_cam(model, img_array, layer_name='top_conv', pred_index=None):
     heatmap = tf.squeeze(heatmap)
     heatmap = tf.maximum(heatmap, 0) / tf.math.reduce_max(heatmap)
     return heatmap.numpy()
+
 # Custom CSS styling
 st.markdown("""
     <style>
@@ -84,6 +89,20 @@ with st.sidebar:
 st.title("🧠 Brain Tumor Detection AI")
 st.markdown("---")
 
+# Model selection
+model_options = ["EfficientNetB0", "ResNet50", "DenseNet121"]
+selected_model = st.selectbox("Select Model", model_options)
+
+# Define the appropriate layer name for each model
+layer_names = {
+    "EfficientNetB0": "top_conv",
+    "ResNet50": "conv5_block3_out",
+    "DenseNet121": "conv5_block16_concat"
+}
+
+# Load the selected model
+model = load_model(selected_model)
+
 # File upload section
 upload_col, info_col = st.columns([2, 1])
 with upload_col:
@@ -113,7 +132,7 @@ if uploaded_file is not None:
         p = np.argmax(prediction, axis=1)[0]
         
         try:
-            heatmap = grad_cam(model, img_array)
+            heatmap = grad_cam(model, img_array, layer_names[selected_model])
             heatmap = cv2.resize(heatmap, (150, 150))
             heatmap = np.uint8(255 * heatmap)
             heatmap_img = cv2.applyColorMap(heatmap, cv2.COLORMAP_JET)
@@ -167,8 +186,8 @@ if uploaded_file is not None:
 
     # Additional information sections
     with st.expander("📚 Technical Details"):
-        st.markdown("""
-        **Model Architecture:** EfficientNetB0  
+        st.markdown(f"""
+        **Model Architecture:** {selected_model}  
         **Input Size:** 150x150 pixels  
         **Classes:** 4 (Glioma, Meningioma, Pituitary, No Tumor)  
         **Explanation Method:** Grad-CAM (Gradient-weighted Class Activation Mapping)  
