@@ -3,13 +3,15 @@ import tensorflow as tf
 from PIL import Image
 import cv2
 import numpy as np
+import matplotlib.pyplot as plt
 from tensorflow.keras.models import Model
 
-# Model loading function
+# Load the pre-trained model with proper caching
 @st.cache_resource
-def load_model(model_name):
-    return tf.keras.models.load_model(f'{model_name}.h5')
+def load_model():
+    return tf.keras.models.load_model('EfficientNetB0.h5')
 
+model = load_model()
 # Grad-CAM implementation
 def grad_cam(model, img_array, layer_name='top_conv', pred_index=None):
     grad_model = Model(
@@ -31,7 +33,6 @@ def grad_cam(model, img_array, layer_name='top_conv', pred_index=None):
     heatmap = tf.squeeze(heatmap)
     heatmap = tf.maximum(heatmap, 0) / tf.math.reduce_max(heatmap)
     return heatmap.numpy()
-
 # Custom CSS styling
 st.markdown("""
     <style>
@@ -64,15 +65,9 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Sidebar with information and model selection
+# Sidebar with information
 with st.sidebar:
     st.title("ℹ️ App Information")
-    model_name = st.selectbox(
-        'Select Model Architecture',
-        ['EfficientNetB0', 'ResNet50', 'DenseNet121'],
-        index=0,
-        help="Choose different CNN architectures for comparison"
-    )
     st.markdown("""
     **Brain Tumor Classifier** helps identify potential tumors in MRI scans using AI.
     - Upload an MRI scan in JPG, JPEG, or PNG format
@@ -84,9 +79,6 @@ with st.sidebar:
     st.markdown("- Glioma Tumor\n- Meningioma Tumor\n- Pituitary Tumor")
     st.markdown("---")
     st.markdown("🩺 This tool is for research purposes only. Always consult a medical professional for diagnosis.")
-
-# Load selected model
-model = load_model(model_name)
 
 # Main app content
 st.title("🧠 Brain Tumor Detection AI")
@@ -175,12 +167,12 @@ if uploaded_file is not None:
 
     # Additional information sections
     with st.expander("📚 Technical Details"):
-        st.markdown(f"""
-        **Model Architecture:** {model_name}  
+        st.markdown("""
+        **Model Architecture:** EfficientNetB0  
         **Input Size:** 150x150 pixels  
         **Classes:** 4 (Glioma, Meningioma, Pituitary, No Tumor)  
         **Explanation Method:** Grad-CAM (Gradient-weighted Class Activation Mapping)  
-        **Accuracy:** [Your {model_name} Accuracy]  
+        **Accuracy:** [Your Model Accuracy]  
         **Training Data:** [Your Dataset Info]
         """)
 
