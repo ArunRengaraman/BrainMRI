@@ -9,12 +9,28 @@ from tensorflow.keras.models import Model
 # Load the pre-trained models with proper caching
 @st.cache_resource
 def load_model(model_name):
-    if model_name == "EfficientNetB0":
-        return tf.keras.models.load_model('EfficientNetB0.h5')
-    elif model_name == "ResNet50":
-        return tf.keras.models.load_model('ResNet50.h5')
-    elif model_name == "DenseNet121":
-        return tf.keras.models.load_model('DenseNet121.h5')
+    model_files = {
+        "EfficientNetB0": "EfficientNetB0.h5",
+        "ResNet50": "ResNet50.h5",
+        "DenseNet121": "DenseNet121.h5"
+    }
+    
+    try:
+        model_path = model_files[model_name]
+        return tf.keras.models.load_model(model_path)
+    except KeyError:
+        st.error(f"Invalid model name: {model_name}")
+        return None
+    except OSError as e:
+        st.error(f"""
+            Model file not found or corrupted: {model_path}
+            Error: {str(e)}
+            Please ensure model files are in the correct directory
+        """)
+        return None
+    except Exception as e:
+        st.error(f"Error loading model: {str(e)}")
+        return None
 
 # Grad-CAM implementation
 def grad_cam(model, img_array, layer_name, pred_index=None):
