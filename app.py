@@ -123,8 +123,8 @@ if uploaded_file is not None:
     with st.spinner("Processing image..."):
         image = Image.open(uploaded_file)
         opencv_image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
-        processed_img = cv2.resize(opencv_image, (150, 150))
-        img_array = processed_img.reshape(1, 150, 150, 3)
+        processed_img = cv2.resize(opencv_image, (224, 224))  # Changed to 224x224
+        img_array = processed_img.reshape(1, 224, 224, 3)     # Updated shape
         
         # Generate prediction and heatmap
         prediction = model.predict(img_array)
@@ -133,7 +133,7 @@ if uploaded_file is not None:
         
         try:
             heatmap = grad_cam(model, img_array, layer_names[selected_model])
-            heatmap = cv2.resize(heatmap, (150, 150))
+            heatmap = cv2.resize(heatmap, (224, 224))         # Updated to 224x224
             heatmap = np.uint8(255 * heatmap)
             heatmap_img = cv2.applyColorMap(heatmap, cv2.COLORMAP_JET)
             superimposed_img = cv2.addWeighted(processed_img, 0.6, heatmap_img, 0.4, 0)
