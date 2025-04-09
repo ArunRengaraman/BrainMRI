@@ -7,7 +7,7 @@ import numpy as np
 # Load the pre-trained model with proper caching
 @st.cache_resource
 def load_model():
-    return tf.keras.models.load_model('Densenet121')
+    return tf.keras.models.load_model('EfficientNetB0.h5')
 
 model = load_model()
 
