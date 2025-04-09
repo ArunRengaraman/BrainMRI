@@ -17,19 +17,26 @@ def load_model(model_name):
     
     try:
         model_path = model_files[model_name]
-        return tf.keras.models.load_model(model_path)
+        
+        # Verify model file exists
+        if not os.path.exists(model_path):
+            st.error(f"Model file not found: {model_path}")
+            return None
+            
+        # Try loading with custom objects (if needed)
+        try:
+            model = tf.keras.models.load_model(model_path)
+            # Verify model has predict method
+            if not hasattr(model, 'predict'):
+                st.error(f"Invalid model format in {model_path}")
+                return None
+            return model
+        except Exception as load_error:
+            st.error(f"Error loading {model_name}: {str(load_error)}")
+            return None
+            
     except KeyError:
-        st.error(f"Invalid model name: {model_name}")
-        return None
-    except OSError as e:
-        st.error(f"""
-            Model file not found or corrupted: {model_path}
-            Error: {str(e)}
-            Please ensure model files are in the correct directory
-        """)
-        return None
-    except Exception as e:
-        st.error(f"Error loading model: {str(e)}")
+        st.error(f"Invalid model selection: {model_name}")
         return None
 
 # Grad-CAM implementation
