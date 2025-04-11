@@ -10,15 +10,10 @@ import streamlit as st
  @st.cache_resource
  def load_model(model_name):
      model_files = {
-         "EfficientNetB0": "EfficientNetB0.h5",
-         "ResNet50": "ResNet50.h5",
-         "DenseNet121": "DenseNet121.h5"
+         "EfficientNetB0": "EfficientNetB0.h5"
      }
     model_files = {
      "EfficientNetB0": "EfficientNetB0.h5",
-     "ResNet50": "ResNet50.h5",
-     "DenseNet121": "DenseNet121.h5",
-     "MobileNetV2": "MobileNetV2.h5"
  }
  
      try:
@@ -112,17 +107,13 @@ import streamlit as st
  st.markdown("---")
  
  # Model selection
- model_options = ["EfficientNetB0", "ResNet50", "DenseNet121"]
- model_options = ["EfficientNetB0", "ResNet50", "DenseNet121", "MobileNetV2"]
+ model_options = ["EfficientNetB0"]
+ model_options = ["EfficientNetB0"]
  selected_model = st.selectbox("Select Model", model_options)
  
  # Define the appropriate layer name for each model
  layer_names = {
-     "EfficientNetB0": "top_conv",
-     "ResNet50": "conv5_block3_out",
-     "DenseNet121": "conv5_block16_concat"
-     "DenseNet121": "conv5_block16_concat",
-     "MobileNetV2": "block_16_project"  # Typical last conv layer for MobileNetV2
+     "EfficientNetB0": "top_conv"
  }
  
  # Load the selected model
