@@ -9,12 +9,12 @@ from tensorflow.keras.models import Model
 # Load the pre-trained models with proper caching
 @st.cache_resource
 def load_model(model_name):
-   model_files = {
-    "EfficientNetB0": "EfficientNetB0.h5",
-    "ResNet50": "ResNet50.h5",
-    "DenseNet121": "DenseNet121.h5",
-    "MobileNetV2": "MobileNetV2.h5"
-}
+    model_files = {
+     "EfficientNetB0": "EfficientNetB0.h5",
+     "ResNet50": "ResNet50.h5",
+     "DenseNet121": "DenseNet121.h5",
+     "MobileNetV2": "MobileNetV2.h5"
+ }
     
     try:
         model_path = model_files[model_name]
