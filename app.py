@@ -1,10 +1,10 @@
 import streamlit as st
- import tensorflow as tf
- from PIL import Image
- import cv2
- import numpy as np
- import matplotlib.pyplot as plt
- from tensorflow.keras.models import Model
+import tensorflow as tf
+from PIL import Image
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+from tensorflow.keras.models import Model
  
  # Load the pre-trained models with proper caching
  @st.cache_resource
