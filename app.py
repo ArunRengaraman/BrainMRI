@@ -117,7 +117,7 @@ selected_model = st.selectbox("Select Model", model_options)
 # Define the appropriate layer name for each model
 layer_names = {
     "EfficientNetB0": "top_conv",
-    "ResNet50": "conv5_block3_out",
+    "ResNet50": "conv5_block3_concat",
     "DenseNet121": "conv5_block16_concat",
     "MobileNetV2": "block_16_project",
     "Xception": "block14_sepconv2_act", 
