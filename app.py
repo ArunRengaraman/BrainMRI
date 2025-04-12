@@ -275,7 +275,7 @@ with st.sidebar:
     st.markdown("🩺 This tool is for research purposes only. Always consult a medical professional for diagnosis.")
 
 # Main app content
-st.title("🧠 Brain Tumor Detection AI")
+st.title("🧠 Brain Tumor Detection using Deep Learning Models")
 st.markdown("---")
 
 # Model selection
@@ -414,8 +414,6 @@ if uploaded_file is not None:
         **Input Size:** 224x224 pixels  
         **Classes:** 4 (Glioma, Meningioma, Pituitary, No Tumor)  
         **Explanation Method:** Grad-CAM (Gradient-weighted Class Activation Mapping)  
-        **Accuracy:** [Your Model Accuracy]  
-        **Training Data:** [Your Dataset Info]
         """)
 
     with st.expander("📖 Interpretation Guide"):
