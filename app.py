@@ -13,7 +13,7 @@ gdown.download_folder = "cache"
 @st.cache_resource
 def load_model(model_name):
     model_files = {
-        "EfficientNetB0": "https://drive.google.com/uc?id=1DiUMWjx07uSbZ6x2nPIUd_2mADLH-fC1",
+        "EfficientNetB0": "https://drive.google.com/uc?id=1hq7JztzRSi4BzoE24PDVS21S_OSe8_8N",
         "MobileNetV2": "https://drive.google.com/uc?id=1QH3DWsfnbMj7NlxjomQ21W7qfEeSKExI"
     }
 
