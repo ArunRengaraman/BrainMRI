@@ -13,10 +13,12 @@ gdown.download_folder = "cache"
 @st.cache_resource
 def load_model(model_name):
     model_files = {
-        "EfficientNetB0": "https://drive.google.com/uc?id=1hq7JztzRSi4BzoE24PDVS21S_OSe8_8N",
-        "ResNet50": "https://drive.google.com/uc?id=1vCS396W538E1O_MI0yr8tmJDKipPNqqD",
-        "DenseNet121": "https://drive.google.com/uc?id=1ENTwug5S8o2KDE5-B0G8WpKbYTr-xIR_",
-        "MobileNetV2": "https://drive.google.com/uc?id=1QH3DWsfnbMj7NlxjomQ21W7qfEeSKExI"
+        "EfficientNetB0": "https://drive.google.com/uc?id=1gev_WR1p0Y9FPu4cpgQUcV-vF-r7cBPo",
+        "ResNet50": "https://drive.google.com/uc?id=14hqNm2bNiNo3Q9oMPpXxiEj0-JBuPa7M",
+        "DenseNet121": "https://drive.google.com/uc?id=1y28fghxyJ0x81pDz5ck_cW7-BW2-4j74",
+        "Xception": "https://drive.google.com/uc?id=1IbnLehzpsceOqE92tNBSnLJotY9mGiDQ,
+        "InceptionV3": "https://drive.google.com/uc?id=1g3aL3PYj-wYNhvOe1zKbrzVDyHGjc8lF,
+        "MobileNetV2": "https://drive.google.com/uc?id=1TYqJh4zDCT5EqQzgajtT6JceryDGeJYp"
     }
 
     try:
@@ -109,7 +111,7 @@ st.title("🧠 Brain Tumor Detection AI")
 st.markdown("---")
 
 # Model selection
-model_options = ["EfficientNetB0","ResNet50", "DenseNet121", "MobileNetV2"]
+model_options = ["EfficientNetB0","ResNet50", "DenseNet121", "Xception", "InceptionV3", "MobileNetV2"]
 selected_model = st.selectbox("Select Model", model_options)
 
 # Define the appropriate layer name for each model
@@ -117,7 +119,9 @@ layer_names = {
     "EfficientNetB0": "top_conv",
     "ResNet50": "conv5_block3_out",
     "DenseNet121": "conv5_block16_concat",
-    "MobileNetV2": "block_16_project"  # Typical last conv layer for MobileNetV2
+    "MobileNetV2": "block_16_project",
+    "Xception": "block14_sepconv2_act", 
+    "InceptionV3": "mixed10" 
 }
 
 # Load the selected model
