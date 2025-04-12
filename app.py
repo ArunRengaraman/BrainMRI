@@ -16,8 +16,8 @@ def load_model(model_name):
         "EfficientNetB0": "https://drive.google.com/uc?id=1gev_WR1p0Y9FPu4cpgQUcV-vF-r7cBPo",
         "ResNet50": "https://drive.google.com/uc?id=14hqNm2bNiNo3Q9oMPpXxiEj0-JBuPa7M",
         "DenseNet121": "https://drive.google.com/uc?id=1y28fghxyJ0x81pDz5ck_cW7-BW2-4j74",
-        "Xception": "https://drive.google.com/uc?id=1IbnLehzpsceOqE92tNBSnLJotY9mGiDQ,
-        "InceptionV3": "https://drive.google.com/uc?id=1g3aL3PYj-wYNhvOe1zKbrzVDyHGjc8lF,
+        "Xception": "https://drive.google.com/uc?id=1IbnLehzpsceOqE92tNBSnLJotY9mGiDQ",
+        "InceptionV3": "https://drive.google.com/uc?id=1g3aL3PYj-wYNhvOe1zKbrzVDyHGjc8lF",
         "MobileNetV2": "https://drive.google.com/uc?id=1TYqJh4zDCT5EqQzgajtT6JceryDGeJYp"
     }
 
