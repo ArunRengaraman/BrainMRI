@@ -3,36 +3,36 @@ import tensorflow as tf
 from PIL import Image
 import cv2
 import numpy as np
-import matplotlib.pyplot as plt
+import gdown  # Added gdown import
 from tensorflow.keras.models import Model
 
-# Load the pre-trained models with proper caching
+# Configure gdown
+gdown.download_folder = "cache"
+
+# Load models from Google Drive with caching
 @st.cache_resource
 def load_model(model_name):
     model_files = {
-        "EfficientNetB0": "EfficientNetB0.h5",
-        "ResNet50": "ResNet50.h5",
-        "DenseNet121": "DenseNet121.h5",
-        "MobileNetV2": "MobileNetV2.h5"
+        "EfficientNetB0": "https://drive.google.com/uc?id=1DiUMWjx07uSbZ6x2nPIUd_2mADLH-fC1",
+        "MobileNetV2": "https://drive.google.com/uc?id=1QH3DWsfnbMj7NlxjomQ21W7qfEeSKExI"
     }
 
     try:
-        model_path = model_files[model_name]
-        return tf.keras.models.load_model(model_path)
+        model_url = model_files[model_name]
+        output_path = f"/tmp/{model_name}.h5"  # Using /tmp for write permissions
+        
+        # Download model file
+        gdown.download(model_url, output_path, quiet=False)
+        
+        # Load and return model
+        return tf.keras.models.load_model(output_path)
+        
     except KeyError:
         st.error(f"Invalid model name: {model_name}")
-        return None
-    except OSError as e:
-        st.error(f"""
-            Model file not found or corrupted: {model_path}
-            Error: {str(e)}
-            Please ensure model files are in the correct directory
-        """)
         return None
     except Exception as e:
         st.error(f"Error loading model: {str(e)}")
         return None
-
 # Grad-CAM implementation
 def grad_cam(model, img_array, layer_name, pred_index=None):
     grad_model = Model(
@@ -107,14 +107,12 @@ st.title("🧠 Brain Tumor Detection AI")
 st.markdown("---")
 
 # Model selection
-model_options = ["EfficientNetB0", "ResNet50", "DenseNet121", "MobileNetV2"]
+model_options = ["EfficientNetB0", "MobileNetV2"]
 selected_model = st.selectbox("Select Model", model_options)
 
 # Define the appropriate layer name for each model
 layer_names = {
     "EfficientNetB0": "top_conv",
-    "ResNet50": "conv5_block3_out",
-    "DenseNet121": "conv5_block16_concat",
     "MobileNetV2": "block_16_project"  # Typical last conv layer for MobileNetV2
 }
 
