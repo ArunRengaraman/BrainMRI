@@ -6,3 +6,4 @@ pandas
 matplotlib
 gdown
 plotly
+fpdf
