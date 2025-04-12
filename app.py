@@ -15,7 +15,7 @@ def load_model(model_name):
     model_files = {
         "EfficientNetB0": "https://drive.google.com/uc?id=1hq7JztzRSi4BzoE24PDVS21S_OSe8_8N",
         "ResNet50": "https://drive.google.com/uc?id=1vCS396W538E1O_MI0yr8tmJDKipPNqqD",
-        "DenseNet121": ,"https://drive.google.com/uc?id=1ENTwug5S8o2KDE5-B0G8WpKbYTr-xIR_",
+        "DenseNet121": "https://drive.google.com/uc?id=1ENTwug5S8o2KDE5-B0G8WpKbYTr-xIR_",
         "MobileNetV2": "https://drive.google.com/uc?id=1QH3DWsfnbMj7NlxjomQ21W7qfEeSKExI"
     }
 
