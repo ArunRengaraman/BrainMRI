@@ -191,15 +191,17 @@ def generate_pdf_report(uploaded_image, processed_img, heatmap_img, diagnosis, c
     
     # Create binary stream to hold PDF data
     pdf_output = io.BytesIO()
-    pdf.output(pdf_output)
-    pdf_data = pdf_output.getvalue()
+    # Fixed: Use the correct method for BytesIO objects
+    pdf_bytes = pdf.output(dest='S').encode('latin1')
+    pdf_output.write(pdf_bytes)
+    pdf_output.seek(0)
     
     # Clean up temp files
     for file_path in [original_path, processed_path, heatmap_path]:
         if os.path.exists(file_path):
             os.remove(file_path)
     
-    return pdf_data
+    return pdf_output.getvalue()
 
 # Function to create a download link
 def get_download_link(pdf_data, filename="brain_tumor_analysis_report.pdf"):
@@ -381,19 +383,22 @@ if uploaded_file is not None:
     # Report generation button
     if st.button("Generate Report", key="generate_report"):
         with st.spinner("Generating detailed PDF report..."):
-            # Generate the PDF report
-            pdf_data = generate_pdf_report(
-                image, 
-                processed_img, 
-                superimposed_img, 
-                diagnosis, 
-                confidence, 
-                selected_model
-            )
-            st.session_state.pdf_report = pdf_data
-            
-            # Show success message
-            st.success("PDF report generated successfully!")
+            try:
+                # Generate the PDF report with error handling
+                pdf_data = generate_pdf_report(
+                    image, 
+                    processed_img, 
+                    superimposed_img, 
+                    diagnosis, 
+                    confidence, 
+                    selected_model
+                )
+                st.session_state.pdf_report = pdf_data
+                
+                # Show success message
+                st.success("PDF report generated successfully!")
+            except Exception as e:
+                st.error(f"Error generating PDF report: {str(e)}")
     
     # Show download link if report is generated
     if st.session_state.pdf_report:
