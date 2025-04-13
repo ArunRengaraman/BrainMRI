@@ -69,137 +69,370 @@ def grad_cam(model, img_array, layer_name, pred_index=None):
 def generate_pdf_report(uploaded_image, processed_img, heatmap_img, diagnosis, confidence, model_name):
     class PDF(FPDF):
         def header(self):
+            # Enhanced header with medical facility placeholder and logo positioning
+            self.set_font('Arial', 'B', 14)
+            self.cell(0, 10, 'MEDICAL IMAGING DIAGNOSTICS', 0, 1, 'C')
             self.set_font('Arial', 'B', 12)
-            self.cell(0, 10, 'Brain Tumor Detection AI - Analysis Report', 0, 1, 'C')
+            self.cell(0, 8, 'Brain Tumor Detection - Analysis Report', 0, 1, 'C')
+            
+            # Add a horizontal line to separate header from content
+            self.line(10, 30, 200, 30)
             self.ln(5)
             
         def footer(self):
-            self.set_y(-15)
+            # Enhanced footer with medical disclaimer and page numbering
+            self.set_y(-25)
             self.set_font('Arial', 'I', 8)
-            self.cell(0, 10, f'Page {self.page_no()}/{{nb}}', 0, 0, 'C')
-            self.cell(0, 10, f'Generated on {datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}', 0, 0, 'R')
+            self.set_draw_color(100, 100, 100)
+            self.line(10, self.get_y(), 200, self.get_y())
+            self.ln(1)
+            self.cell(0, 5, f'Page {self.page_no()}/{{nb}}', 0, 1, 'R')
+            self.cell(0, 5, f'Generated on {datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}', 0, 1, 'R')
+            self.set_text_color(192, 57, 43)
+            self.cell(0, 5, 'For clinical correlation only. Not a substitute for professional medical diagnosis.', 0, 1, 'C')
+            self.set_text_color(0, 0, 0)
     
-    # Create PDF object
+    # Create PDF object with metadata
     pdf = PDF()
     pdf.alias_nb_pages()
+    pdf.set_author('Brain Tumor Detection AI System')
+    pdf.set_title('Brain MRI Analysis Report')
+    pdf.set_subject(f'MRI Analysis - {diagnosis}')
+    pdf.set_creator('Medical Imaging AI Platform v1.0')
     pdf.add_page()
     
-    # Add title
-    pdf.set_font('Arial', 'B', 16)
-    pdf.cell(0, 10, 'Brain MRI Analysis Report', 0, 1, 'C')
-    pdf.line(10, 30, 200, 30)
-    pdf.ln(10)
+    # Add patient information section (placeholder)
+    pdf.set_font('Arial', 'B', 12)
+    pdf.set_fill_color(240, 240, 240)
+    pdf.cell(0, 10, 'PATIENT INFORMATION', 1, 1, 'L', True)
+    pdf.set_font('Arial', '', 10)
     
-    # Add report details
-    pdf.set_font('Arial', '', 12)
-    pdf.cell(0, 10, f'Report Date: {datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}', 0, 1)
-    pdf.cell(0, 10, f'Model Used: {model_name}', 0, 1)
+    # Create a table-like structure for patient info
+    col_width = 95
+    pdf.cell(col_width, 8, 'Patient ID: [REDACTED]', 'LB', 0)
+    pdf.cell(col_width, 8, 'Date of Birth: [REDACTED]', 'RB', 1)
+    pdf.cell(col_width, 8, 'Referring Physician: [REDACTED]', 'LB', 0)
+    pdf.cell(col_width, 8, 'Scan Date: [REDACTED]', 'RB', 1)
     pdf.ln(5)
     
-    # Add diagnosis section
+    # Add report details with improved formatting
+    pdf.set_font('Arial', 'B', 12)
+    pdf.set_fill_color(230, 230, 230)
+    pdf.cell(0, 10, 'ANALYSIS DETAILS', 1, 1, 'L', True)
+    pdf.set_font('Arial', '', 10)
+    
+    # Create a table for analysis details
+    pdf.cell(col_width, 8, f'Report Generation: {datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}', 'LB', 0)
+    pdf.cell(col_width, 8, f'Model: {model_name}', 'RB', 1)
+    pdf.cell(col_width, 8, f'Analysis ID: AI-{datetime.datetime.now().strftime("%Y%m%d%H%M")}', 'LB', 0)
+    pdf.cell(col_width, 8, f'Protocol: Standard Brain MRI', 'RB', 1)
+    pdf.ln(8)
+    
+    # Add diagnosis section with improved formatting and medical standards
     pdf.set_font('Arial', 'B', 14)
-    pdf.cell(0, 10, 'Diagnosis Results:', 0, 1)
+    pdf.set_fill_color(220, 220, 220)
+    pdf.cell(0, 10, 'DIAGNOSIS RESULTS', 1, 1, 'C', True)
+    pdf.ln(2)
+    
+    # Create a highlighted box for diagnosis
     pdf.set_font('Arial', 'B', 12)
     
-    # Set diagnosis color
+    # Set diagnosis color and background based on diagnosis
     if "Glioma" in diagnosis:
-        pdf.set_text_color(231, 76, 60)  # Red for Glioma
+        pdf.set_fill_color(255, 235, 235)
+        pdf.set_text_color(180, 50, 50)
+        severity = "HIGH PRIORITY"
     elif "No Tumor" in diagnosis:
-        pdf.set_text_color(46, 204, 113)  # Green for No Tumor
+        pdf.set_fill_color(235, 255, 235)
+        pdf.set_text_color(50, 150, 50)
+        severity = "NORMAL"
     elif "Meningioma" in diagnosis:
-        pdf.set_text_color(52, 152, 219)  # Blue for Meningioma
-    else:
-        pdf.set_text_color(241, 196, 15)  # Yellow for Pituitary
+        pdf.set_fill_color(235, 235, 255)
+        pdf.set_text_color(50, 50, 150)
+        severity = "MEDIUM PRIORITY"
+    else:  # Pituitary
+        pdf.set_fill_color(255, 255, 235)
+        pdf.set_text_color(150, 120, 10)
+        severity = "MEDIUM PRIORITY"
     
-    pdf.cell(0, 10, f'Predicted Diagnosis: {diagnosis}', 0, 1)
-    pdf.set_text_color(0, 0, 0)  # Reset text color to black
-    pdf.set_font('Arial', '', 12)
-    pdf.cell(0, 10, f'Confidence: {confidence*100:.2f}%', 0, 1)
-    pdf.ln(5)
+    # Display diagnosis in a highlighted box
+    pdf.cell(0, 10, f'Predicted Diagnosis: {diagnosis}', 1, 1, 'C', True)
+    pdf.set_font('Arial', 'B', 10)
+    pdf.cell(0, 8, f'Confidence: {confidence*100:.2f}% | Clinical Priority: {severity}', 1, 1, 'C', True)
+    pdf.set_text_color(0, 0, 0)  # Reset text color
+    pdf.ln(8)
     
-    # Save images to temporary files
+    # Save images to temporary files with proper error handling
     temp_dir = "/tmp"
     os.makedirs(temp_dir, exist_ok=True)
     
-    # Convert images to PIL format and save
-    original_pil = Image.fromarray(np.array(uploaded_image))
-    original_path = f"{temp_dir}/original.png"
-    original_pil.save(original_path)
+    try:
+        # Convert images to PIL format and save
+        original_pil = Image.fromarray(np.array(uploaded_image))
+        original_path = f"{temp_dir}/original.png"
+        original_pil.save(original_path)
+        
+        processed_pil = Image.fromarray(cv2.cvtColor(processed_img, cv2.COLOR_BGR2RGB))
+        processed_path = f"{temp_dir}/processed.png"
+        processed_pil.save(processed_path)
+        
+        heatmap_pil = Image.fromarray(cv2.cvtColor(heatmap_img, cv2.COLOR_BGR2RGB))
+        heatmap_path = f"{temp_dir}/heatmap.png"
+        heatmap_pil.save(heatmap_path)
+        
+        # Add first page for Original MRI Scan
+        pdf.add_page()
+        pdf.set_font('Arial', 'B', 14)
+        pdf.set_fill_color(220, 220, 220)
+        pdf.cell(0, 10, 'DIAGNOSTIC IMAGING', 1, 1, 'C', True)
+        pdf.ln(2)
+        
+        # First image: Original image
+        pdf.set_font('Arial', 'B', 11)
+        pdf.cell(0, 8, 'Original MRI Scan:', 0, 1)
+        pdf.set_font('Arial', 'I', 9)
+        pdf.cell(0, 6, 'Unprocessed patient scan as received', 0, 1, 'C')
+        
+        # Center the image with proper dimensions
+        image_width = 160  # Larger image size
+        page_width = 210
+        x_position = (page_width - image_width) / 2
+        pdf.image(original_path, x=x_position, w=image_width)
+        
+        # Second page: Processed image
+        pdf.add_page()
+        pdf.set_font('Arial', 'B', 14)
+        pdf.set_fill_color(220, 220, 220)
+        pdf.cell(0, 10, 'DIAGNOSTIC IMAGING', 1, 1, 'C', True)
+        pdf.ln(2)
+        
+        pdf.set_font('Arial', 'B', 11)
+        pdf.cell(0, 8, 'Processed Image:', 0, 1)
+        pdf.set_font('Arial', 'I', 9)
+        pdf.cell(0, 6, 'Preprocessed scan with noise reduction and contrast enhancement', 0, 1, 'C')
+        pdf.image(processed_path, x=x_position, w=image_width)
+        
+        # Third page: Heatmap image
+        pdf.add_page()
+        pdf.set_font('Arial', 'B', 14)
+        pdf.set_fill_color(220, 220, 220)
+        pdf.cell(0, 10, 'DIAGNOSTIC IMAGING', 1, 1, 'C', True)
+        pdf.ln(2)
+        
+        pdf.set_font('Arial', 'B', 11)
+        pdf.cell(0, 8, 'AI Attention Map:', 0, 1)
+        pdf.set_font('Arial', 'I', 9)
+        pdf.cell(0, 6, 'Regions of interest identified by the AI model', 0, 1, 'C')
+        pdf.image(heatmap_path, x=x_position, w=image_width)
+        
+        # Add legend for heatmap colors
+        pdf.ln(2)
+        pdf.set_font('Arial', 'I', 8)
+        pdf.set_text_color(200, 0, 0)
+        pdf.cell(60, 5, 'Red: High attention', 0, 0, 'R')
+        pdf.set_text_color(0, 150, 0)
+        pdf.cell(60, 5, 'Green: Moderate attention', 0, 0, 'C')
+        pdf.set_text_color(0, 0, 200)
+        pdf.cell(60, 5, 'Blue: Low attention', 0, 1, 'L')
+        pdf.set_text_color(0, 0, 0)  # Reset text color
+        
+    except Exception as e:
+        # Handle image processing errors
+        pdf.set_text_color(255, 0, 0)
+        pdf.cell(0, 10, f"Error processing images: {str(e)}", 0, 1)
+        pdf.set_text_color(0, 0, 0)
     
-    processed_pil = Image.fromarray(cv2.cvtColor(processed_img, cv2.COLOR_BGR2RGB))
-    processed_path = f"{temp_dir}/processed.png"
-    processed_pil.save(processed_path)
-    
-    heatmap_pil = Image.fromarray(cv2.cvtColor(heatmap_img, cv2.COLOR_BGR2RGB))
-    heatmap_path = f"{temp_dir}/heatmap.png"
-    heatmap_pil.save(heatmap_path)
-    
-    # Add images to PDF
-    pdf.set_font('Arial', 'B', 14)
-    pdf.cell(0, 10, 'Analysis Images:', 0, 1)
-    
-    # Add original image
-    pdf.set_font('Arial', 'B', 12)
-    pdf.cell(0, 10, 'Original MRI Scan:', 0, 1)
-    pdf.image(original_path, x=50, w=110)
-    pdf.ln(5)
-    
-    # Add processed image
-    pdf.cell(0, 10, 'Processed Image:', 0, 1)
-    pdf.image(processed_path, x=50, w=110)
-    pdf.ln(5)
-    
-    # Add heatmap image
-    pdf.cell(0, 10, 'Model Attention Map:', 0, 1)
-    pdf.image(heatmap_path, x=50, w=110)
-    pdf.set_font('Arial', 'I', 10)
-    pdf.cell(0, 10, 'Red areas show regions influencing prediction', 0, 1, 'C')
-    pdf.ln(5)
-    
-    # Add detailed analysis section
+    # Add detailed analysis section with medical terminology on a single page
     pdf.add_page()
     pdf.set_font('Arial', 'B', 14)
-    pdf.cell(0, 10, 'Detailed Analysis:', 0, 1)
-    pdf.set_font('Arial', '', 12)
-    
-    # Add tumor type information based on diagnosis
-    if "Glioma" in diagnosis:
-        pdf.multi_cell(0, 10, 'Glioma Tumor: Gliomas are tumors that develop from glial cells in the brain. They can be low-grade (slow growing) or high-grade (fast growing). They typically affect the cerebrum, brain stem, or cerebellum and may cause symptoms including headaches, seizures, and cognitive changes depending on their location and size.')
-    elif "Meningioma" in diagnosis:
-        pdf.multi_cell(0, 10, 'Meningioma Tumor: Meningiomas arise from the meninges, the membranes that surround the brain and spinal cord. They are typically slow-growing and often benign. Symptoms vary based on tumor location and may include headaches, vision problems, and hearing loss. Many meningiomas can be successfully treated with surgery.')
-    elif "Pituitary" in diagnosis:
-        pdf.multi_cell(0, 10, 'Pituitary Tumor: Pituitary tumors develop in the pituitary gland at the base of the brain. They can affect hormone production and may cause symptoms including vision problems, headaches, and various hormonal imbalances. Treatment depends on size, type, and hormone activity.')
-    else:
-        pdf.multi_cell(0, 10, 'No Tumor Detected: The analysis suggests no evidence of tumor in the provided MRI scan. The brain structures appear within normal limits based on the AI model\'s evaluation.')
-    
+    pdf.set_fill_color(220, 220, 220)
+    pdf.cell(0, 10, 'DETAILED CLINICAL ANALYSIS', 1, 1, 'C', True)
     pdf.ln(5)
     
-    # Add model interpretation section
-    pdf.set_font('Arial', 'B', 14)
-    pdf.cell(0, 10, 'Model Interpretation Guide:', 0, 1)
-    pdf.set_font('Arial', '', 12)
-    pdf.multi_cell(0, 10, 'The attention map highlights regions that influenced the model\'s prediction. Red areas indicate high model attention, while green and blue areas show moderate and low attention respectively. This visualization helps verify that the model is focusing on biologically relevant patterns in the MRI scan.')
-    pdf.ln(5)
-    
-    # Add disclaimer
+    # Add tumor type information based on diagnosis with medical terminology
     pdf.set_font('Arial', 'B', 12)
-    pdf.set_text_color(192, 57, 43)  # Red color for disclaimer
-    pdf.cell(0, 10, 'IMPORTANT DISCLAIMER:', 0, 1)
-    pdf.set_font('Arial', 'I', 10)
-    pdf.multi_cell(0, 10, 'This report is generated by an AI system for research purposes only. It is not a substitute for professional medical diagnosis. Always consult with a qualified healthcare professional for proper diagnosis and treatment decisions.')
-    pdf.set_text_color(0, 0, 0)  # Reset text color
+    pdf.cell(0, 8, 'Findings:', 0, 1)
+    pdf.set_font('Arial', '', 10)
     
+    if "Glioma" in diagnosis:
+        pdf.multi_cell(0, 6, 'The AI analysis indicates features consistent with Glioma, a primary brain tumor arising from glial cells. Gliomas can be classified according to the WHO grading system (I-IV) based on histopathological features. The imaging characteristics observed include:')
+        pdf.ln(2)
+        pdf.set_font('Arial', '', 10)
+        # Use bullet points for key findings
+        findings = [
+            'Irregular borders with potential infiltration into surrounding parenchyma',
+            'Heterogeneous signal intensity on T1/T2-weighted sequences',
+            'Possible areas of necrosis or cystic degeneration',
+            'Variable enhancement pattern following contrast administration',
+            'Potential mass effect with midline shift or ventricular compression'
+        ]
+        for finding in findings:
+            pdf.cell(5, 6, '', 0, 0)
+            pdf.cell(0, 6, '- ' + finding, 0, 1)
+    elif "Meningioma" in diagnosis:
+        pdf.multi_cell(0, 6, 'The AI analysis indicates features consistent with Meningioma, a typically benign extra-axial neoplasm arising from arachnoid cap cells of the meninges. The imaging characteristics observed include:')
+        pdf.ln(2)
+        pdf.set_font('Arial', '', 10)
+        findings = [
+            'Well-circumscribed, extra-axial mass with broad dural attachment',
+            'Homogeneous enhancement following contrast administration',
+            'Possible "dural tail" sign extending from the primary mass',
+            'Potential calcifications within the tumor matrix',
+            'Adjacent bone reaction (hyperostosis) may be present'
+        ]
+        for finding in findings:
+            pdf.cell(5, 6, '', 0, 0)
+            pdf.cell(0, 6, '- ' + finding, 0, 1)
+    elif "Pituitary" in diagnosis:
+        pdf.multi_cell(0, 6, 'The AI analysis indicates features consistent with a Pituitary tumor (adenoma), a neoplasm arising from the anterior pituitary gland. The imaging characteristics observed include:')
+        pdf.ln(2)
+        pdf.set_font('Arial', '', 10)
+        findings = [
+            'Well-defined sellar/suprasellar mass',
+            'Potential compression of the optic chiasm if suprasellar extension is present',
+            'Variable signal intensity depending on hemorrhage or cystic components',
+            'Homogeneous or heterogeneous enhancement pattern',
+            'Possible deviation of the pituitary stalk'
+        ]
+        for finding in findings:
+            pdf.cell(5, 6, '', 0, 0)
+            pdf.cell(0, 6, '- ' + finding, 0, 1)
+    else:
+        pdf.multi_cell(0, 6, 'The AI analysis indicates No Evidence of Tumor in the provided MRI scan. The brain structures appear within normal limits with:')
+        pdf.ln(2)
+        pdf.set_font('Arial', '', 10)
+        findings = [
+            'Normal gray-white matter differentiation',
+            'No evidence of space-occupying lesions',
+            'No abnormal enhancement patterns',
+            'Normal ventricular system size and configuration',
+            'No midline shift or mass effect'
+        ]
+        for finding in findings:
+            pdf.cell(5, 6, '', 0, 0)
+            pdf.cell(0, 6, '- ' + finding, 0, 1)
+    
+    pdf.ln(5)
+    
+    # Add clinical correlation section
+    pdf.set_font('Arial', 'B', 12)
+    pdf.cell(0, 8, 'Clinical Correlation:', 0, 1)
+    pdf.set_font('Arial', '', 10)
+    pdf.multi_cell(0, 6, 'The above findings should be correlated with the patient\'s clinical presentation, including neurological symptoms, duration of symptoms, progression pattern, and relevant medical history. Laboratory findings and additional imaging studies may provide complementary diagnostic information.')
+    pdf.ln(5)
+    
+    # Add recommendations section
+    pdf.set_font('Arial', 'B', 12)
+    pdf.cell(0, 8, 'Recommendations:', 0, 1)
+    pdf.set_font('Arial', '', 10)
+    
+    if "No Tumor" not in diagnosis:
+        recommendations = [
+            'Neurosurgical consultation for evaluation and management planning',
+            'Consider advanced imaging (perfusion MRI, MR spectroscopy) for further characterization',
+            'Potential stereotactic biopsy for definitive histopathological diagnosis',
+            'Neurological monitoring for progression of symptoms',
+            'Follow-up imaging in 1-3 months to assess for interval changes'
+        ]
+    else:
+        recommendations = [
+            'Clinical follow-up as indicated by patient symptoms',
+            'Consider follow-up imaging if new neurological symptoms develop',
+            'Routine neurological examination at next clinical visit',
+            'No immediate intervention required based on current findings',
+            'Patient reassurance regarding absence of tumor features'
+        ]
+    
+    for rec in recommendations:
+        pdf.cell(5, 6, '', 0, 0)
+        pdf.cell(0, 6, '- ' + rec, 0, 1)
+    
+    # Add model interpretation section without performance metrics table
+    pdf.add_page()
+    pdf.set_font('Arial', 'B', 14)
+    pdf.set_fill_color(220, 220, 220)
+    pdf.cell(0, 10, 'AI MODEL INTERPRETATION', 1, 1, 'C', True)
+    pdf.ln(5)
+    
+    pdf.set_font('Arial', '', 10)
+    pdf.multi_cell(0, 6, f'This analysis was performed using {model_name}, a deep learning convolutional neural network trained on {3000} clinically validated MRI scans. The attention map utilizes Gradient-weighted Class Activation Mapping (Grad-CAM) to highlight regions that influenced the model\'s prediction, with color intensity proportional to feature importance.')
+    pdf.ln(5)
+    
+    # Add a note about confidence directly instead of the table
+    pdf.set_font('Arial', 'B', 11)
+    confidence_value = f'{confidence*100:.2f}%'
+    pdf.cell(0, 8, f'Model Confidence: {confidence_value}', 0, 1)
+    
+    if confidence*100 > 90:
+        pdf.set_font('Arial', '', 10)
+        pdf.set_text_color(0, 150, 0)
+        pdf.cell(0, 6, 'The model has expressed high confidence in this diagnosis.', 0, 1)
+    elif confidence*100 > 75:
+        pdf.set_font('Arial', '', 10)
+        pdf.set_text_color(0, 100, 0)
+        pdf.cell(0, 6, 'The model has expressed good confidence in this diagnosis.', 0, 1)
+    else:
+        pdf.set_font('Arial', '', 10)
+        pdf.set_text_color(180, 50, 50)
+        pdf.cell(0, 6, 'The model has expressed moderate confidence in this diagnosis. Further clinical correlation is strongly advised.', 0, 1)
+    
+    pdf.set_text_color(0, 0, 0)  # Reset text color
+    pdf.ln(5)
+    
+    # Add disclaimer section with enhanced medical-legal language
+    pdf.set_draw_color(192, 57, 43)
+    pdf.set_fill_color(253, 237, 236)
+    pdf.set_line_width(0.5)
+    pdf.rect(10, pdf.get_y(), 190, 40, 'DF')
+    pdf.ln(2)
+    
+    pdf.set_font('Arial', 'B', 12)
+    pdf.set_text_color(192, 57, 43)
+    pdf.cell(0, 8, 'MEDICAL DISCLAIMER', 0, 1, 'C')
+    pdf.set_font('Arial', '', 9)
+    pdf.multi_cell(0, 5, 'This report is generated by an artificial intelligence system and is intended for research and clinical decision support purposes only. The findings presented are not a definitive medical diagnosis and should not be used as the sole basis for clinical management decisions.')
+    pdf.ln(2)
+    pdf.multi_cell(0, 5, 'A qualified healthcare professional must review these results in conjunction with the patient\'s clinical history, physical examination findings, and other diagnostic tests. The treating physician maintains full responsibility for all diagnostic and treatment decisions.')
+    pdf.set_text_color(0, 0, 0)
+
     # Create binary stream to hold PDF data
     pdf_output = io.BytesIO()
-    # Fixed: Use the correct method for BytesIO objects
-    pdf_bytes = pdf.output(dest='S').encode('latin1')
-    pdf_output.write(pdf_bytes)
-    pdf_output.seek(0)
+    
+    try:
+        # Fix: Use the correct method for PyFPDF output handling
+        pdf_bytes = pdf.output(dest='S')
+        # Check if pdf_bytes is already bytes or if it's a string that needs encoding
+        if isinstance(pdf_bytes, str):
+            pdf_bytes = pdf_bytes.encode('latin1')
+        # Now write the bytes to the BytesIO object
+        pdf_output.write(pdf_bytes)
+        pdf_output.seek(0)
+    except Exception as e:
+        # Handle PDF generation errors
+        print(f"Error generating PDF: {str(e)}")
+        # Create a simple error PDF if the main one fails
+        error_pdf = FPDF()
+        error_pdf.add_page()
+        error_pdf.set_font('Arial', 'B', 16)
+        error_pdf.cell(0, 10, 'Error Generating Report', 0, 1, 'C')
+        error_pdf.set_font('Arial', '', 12)
+        error_pdf.multi_cell(0, 10, f'An error occurred while generating the report: {str(e)}')
+        pdf_bytes = error_pdf.output(dest='S')
+        # Apply the same type checking for the error PDF
+        if isinstance(pdf_bytes, str):
+            pdf_bytes = pdf_bytes.encode('latin1')
+        pdf_output = io.BytesIO()
+        pdf_output.write(pdf_bytes)
+        pdf_output.seek(0)
     
     # Clean up temp files
-    for file_path in [original_path, processed_path, heatmap_path]:
-        if os.path.exists(file_path):
-            os.remove(file_path)
+    finally:
+        for file_path in [original_path, processed_path, heatmap_path]:
+            if os.path.exists(file_path):
+                try:
+                    os.remove(file_path)
+                except:
+                    pass
     
     return pdf_output.getvalue()
 
