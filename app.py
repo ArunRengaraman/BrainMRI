@@ -551,7 +551,7 @@ if uploaded_file is not None:
     # Image processing and prediction
     with st.spinner("Processing image..."):
         image = Image.open(uploaded_file)
-        opencv_image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
+        opencv_image = cv2.cvtColor(np.array(image), cv2.COLOR_BGR2RGB)
         processed_img = cv2.resize(opencv_image, (224, 224))  # Changed to 224x224
         img_array = processed_img.reshape(1, 224, 224, 3)     # Updated shape
 
