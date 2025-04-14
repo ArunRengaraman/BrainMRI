@@ -565,6 +565,7 @@ if uploaded_file is not None:
             heatmap = cv2.resize(heatmap, (224, 224))         # Updated to 224x224
             heatmap = np.uint8(255 * heatmap)
             heatmap_img = cv2.applyColorMap(heatmap, cv2.COLORMAP_JET)
+            heatmap_img = cv2.cvtColor(np.array(heatmap_img), cv2.COLOR_BGR2RGB)
             superimposed_img = cv2.addWeighted(processed_img, 0.6, heatmap_img, 0.4, 0)
         except Exception as e:
             st.error(f"Could not generate explanation: {str(e)}")
