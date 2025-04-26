@@ -18,12 +18,12 @@ gdown.download_folder = "cache"
 @st.cache_resource
 def load_model(model_name):
     model_files = {
-        "EfficientNetB0": "https://drive.google.com/uc?id=1gev_WR1p0Y9FPu4cpgQUcV-vF-r7cBPo",
-        "ResNet50": "https://drive.google.com/uc?id=14hqNm2bNiNo3Q9oMPpXxiEj0-JBuPa7M",
-        "DenseNet121": "https://drive.google.com/uc?id=1y28fghxyJ0x81pDz5ck_cW7-BW2-4j74",
-        "Xception": "https://drive.google.com/uc?id=1IbnLehzpsceOqE92tNBSnLJotY9mGiDQ",
-        "InceptionV3": "https://drive.google.com/uc?id=1g3aL3PYj-wYNhvOe1zKbrzVDyHGjc8lF",
-        "MobileNetV2": "https://drive.google.com/uc?id=1TYqJh4zDCT5EqQzgajtT6JceryDGeJYp"
+        "EfficientNetB0": "https://drive.google.com/uc?id=17Y4uw8fxYKl-0C6EINEimW0N1T9HrtKc",
+        "ResNet50": "https://drive.google.com/uc?id=1hP6ss3IUgzCdpDCLZyKyHX7ddKmsqq4T",
+        "DenseNet121": "https://drive.google.com/uc?id=1z6sXfR4CwAiBsR8cOsXk6TmHBLaN7AQd",
+        "Xception": "https://drive.google.com/uc?id=1v8xsIt0bd8gWGA-hQGfbFEaqZGpMdyuA",
+        "InceptionV3": "https://drive.google.com/uc?id=1VGGRd4GgtxBjkUfMEJAFCr_AnNoReL7R",
+        "MobileNetV2": "https://drive.google.com/uc?id=1HcCPkjS_n5LiL0M7YizIAlZTV-iStv7r"
     }
 
     try:
